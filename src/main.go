@@ -20,11 +20,13 @@ import (
 const (
 	defaultGaryImg   = "Gary76.jpg"
 	defaultGooberImg = "goober8.jpg"
+	defaultGullyImg  = "gully1.jpg"
 )
 
 var (
 	garyImages   []string
 	gooberImages []string
+	gullyImages  []string
 	imageCacheMu sync.RWMutex
 )
 
@@ -179,31 +181,37 @@ func main() {
 
 	garyDir := os.Getenv("GARY_DIR")
 	gooberDir := os.Getenv("GOOBER_DIR")
+	gullyDir := os.Getenv("GULLY_DIR")
 	quotesPath := os.Getenv("QUOTES_FILE")
 	jokesPath := os.Getenv("JOKES_FILE")
 
 	garyImages = cacheFileNames(garyDir)
 	gooberImages = cacheFileNames(gooberDir)
-
+	gullyImages = cacheFileNames(gullyDir)
 	startDirectoryWatcher(garyDir, &garyImages, "Gary")
 	startDirectoryWatcher(gooberDir, &gooberImages, "Goober")
+	startDirectoryWatcher(gullyDir, &gullyImages, "Gully")
 
 	r.Static("/Gary", garyDir)
 	r.Static("/Goober", gooberDir)
+	r.Static("/Gully", gullyDir)
 
 	imageRoutes := r.Group("/")
 	{
 		imageRoutes.GET("/gary/image/*path", serveRandomImageHandler(&garyImages, defaultGaryImg, garyDir))
 		imageRoutes.GET("/goober/image/*path", serveRandomImageHandler(&gooberImages, defaultGooberImg, gooberDir))
+		imageRoutes.GET("/gully/image/*path", serveRandomImageHandler(&gullyImages, defaultGullyImg, gullyDir))
 	}
 
 	apiRoutes := r.Group("/")
 	{
 		garyBaseURL := os.Getenv("GARYURL")
 		gooberBaseURL := os.Getenv("GOOBERURL")
+		gullyBaseURL := os.Getenv("GULLYURL")
 
 		apiRoutes.GET("/gary", serveImageURLHandler(garyBaseURL, garyDir, &garyImages, defaultGaryImg))
 		apiRoutes.GET("/goober", serveImageURLHandler(gooberBaseURL, gooberDir, &gooberImages, defaultGooberImg))
+		apiRoutes.GET("/gully", serveImageURLHandler(gullyBaseURL, gullyDir, &gullyImages, defaultGullyImg))
 		apiRoutes.GET("/quote", serveRandomLineHandler(quotesPath))
 		apiRoutes.GET("/joke", serveRandomLineHandler(jokesPath))
 
@@ -216,6 +224,12 @@ func main() {
 		apiRoutes.GET("/goober/count", func(c *gin.Context) {
 			imageCacheMu.RLock()
 			count := len(gooberImages)
+			imageCacheMu.RUnlock()
+			c.JSON(http.StatusOK, gin.H{"count": count})
+		})
+		apiRoutes.GET("/gully/count", func(c *gin.Context) {
+			imageCacheMu.RLock()
+			count := len(gullyImages)
 			imageCacheMu.RUnlock()
 			c.JSON(http.StatusOK, gin.H{"count": count})
 		})

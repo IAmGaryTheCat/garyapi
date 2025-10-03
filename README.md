@@ -9,20 +9,29 @@ A minimal HTTP API for serving random images of Gary and Goober, as well as quot
 ### Image URLs (JSON)
 These endpoints return a JSON object containing a URL to a random image.
 
-- `GET /gary` → `{ "url": "https://..." }`
-- `GET /goober` → `{ "url": "https://..." }`
+- `GET /gary` → `{ "url": "https://...", "number": 1 }`
+- `GET /goober` → `{ "url": "https://...", "number": 1 }`
+ - `GET /gully` → `{ "url": "https://...", "number": 1 }`
 
 ### Raw Images
 These endpoints return the image file directly.
 
 - `GET /gary/image` → image/jpeg (or other image type)
 - `GET /goober/image` → image/jpeg (or other image type)
+ - `GET /gully/image` → image/jpeg (or other image type)
 
 ### Quotes and Jokes
 Returns a single line from a JSON array.
 
 - `GET /quote` → `{ "quote": "..." }`
 - `GET /joke` → `{ "joke": "..." }`
+
+### Counts
+These endpoints return the number of images currently available for each category. They are useful for monitoring or UI display.
+
+- `GET /gary/count` → `{ "count": 42 }`
+- `GET /goober/count` → `{ "count": 8 }`
+- `GET /gully/count` → `{ "count": 10 }`
 
 ---
 

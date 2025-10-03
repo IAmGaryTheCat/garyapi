@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -178,7 +179,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .api-info {
@@ -221,8 +224,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .footer {
@@ -235,245 +245,341 @@
     }
   </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="#">
-      <i class="bi bi-code-square"></i>
-      Gary & Goober API
-    </a>
-    <div class="status-indicator">
-      <div class="status-dot"></div>
-      API Online
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-code-square"></i>
+        Gary & Goober API
+      </a>
+      <div class="status-indicator">
+        <div class="status-dot"></div>
+        API Online
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<div class="hero-section">
-  <div class="container">
-    <h1 class="hero-title">Gary & Goober API Documentation</h1>
-    <p class="hero-subtitle">A RESTful API providing random images, quotes, and jokes with structured JSON responses</p>
-  </div>
-</div>
-
-<div class="container py-5">
-  <div class="api-info">
-    <h5><i class="bi bi-info-circle"></i> API Information</h5>
-    <p class="mb-2"><strong>Base URL:</strong> <span class="base-url">https://api.garythe.cat</span></p>
-    <p class="mb-0">All endpoints return JSON responses unless otherwise specified. Images include extracted numeric IDs from filenames.</p>
-  </div>
-
-  <!-- /gary -->
-  <div class="endpoint-card">
-    <div class="endpoint-header">
-      <h4 class="endpoint-title">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/gary</span>
-      </h4>
-    </div>
-    <div class="endpoint-body">
-      <p class="endpoint-description">
-        Retrieves a random Gary image URL with its extracted numeric identifier from the filename.
+  <div class="hero-section">
+    <div class="container">
+      <h1 class="hero-title">Gary & Goober API Documentation</h1>
+      <p class="hero-subtitle">A RESTful API providing random images, quotes, and jokes with structured JSON responses
       </p>
-      
-      <div class="response-section">
-        <div class="section-label">Example Response</div>
-        <pre><code class="language-json">{
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="api-info">
+      <h5><i class="bi bi-info-circle"></i> API Information</h5>
+      <p class="mb-2"><strong>Base URL:</strong> <span class="base-url">https://api.garythe.cat</span></p>
+      <p class="mb-0">All endpoints return JSON responses unless otherwise specified. Images include extracted numeric
+        IDs from filenames.</p>
+    </div>
+
+    <!-- /gary -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/gary</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Retrieves a random Gary image URL with its extracted numeric identifier from the filename.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
   "url": "https://api.garythe.cat/Gary/Gary76.jpg",
   "number": 76
 }</code></pre>
-      </div>
+        </div>
 
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-try text-white" onclick="fetchExample('/gary', 'garyResponse')">
-          <i class="bi bi-play-fill"></i> Try it out
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/gary', 'garyResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="garyResponse" class="live-response"></div>
       </div>
-      <div id="garyResponse" class="live-response"></div>
     </div>
-  </div>
 
-  <!-- /gary/image -->
-  <div class="endpoint-card">
-    <div class="endpoint-header">
-      <h4 class="endpoint-title">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/gary/image</span>
-      </h4>
-    </div>
-    <div class="endpoint-body">
-      <p class="endpoint-description">
-        Returns a random Gary image directly as binary JPEG data for immediate display or download.
-      </p>
-      
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-try text-white" onclick="loadImage('/gary/image', 'garyImage')">
-          <i class="bi bi-image"></i> Load Preview
-        </button>
+    <!-- /gary/image -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/gary/image</span>
+        </h4>
       </div>
-      <div><img id="garyImage" class="img-preview" src="" alt="Click 'Load Preview' to see image" style="display: none;" /></div>
-    </div>
-  </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns a random Gary image directly as binary JPEG data for immediate display or download.
+        </p>
 
-  <!-- /goober -->
-  <div class="endpoint-card">
-    <div class="endpoint-header">
-      <h4 class="endpoint-title">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/goober</span>
-      </h4>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="loadImage('/gary/image', 'garyImage')">
+            <i class="bi bi-image"></i> Load Preview
+          </button>
+        </div>
+        <div><img id="garyImage" class="img-preview" src="" alt="Click 'Load Preview' to see image"
+            style="display: none;" /></div>
+      </div>
     </div>
-    <div class="endpoint-body">
-      <p class="endpoint-description">
-        Retrieves a random Goober image URL with its extracted numeric identifier from the filename.
-      </p>
-      
-      <div class="response-section">
-        <div class="section-label">Example Response</div>
-        <pre><code class="language-json">{
+
+    <!-- /goober -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/goober</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Retrieves a random Goober image URL with its extracted numeric identifier from the filename.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
   "url": "https://api.garythe.cat/Goober/goober8.jpg",
   "number": 8
 }</code></pre>
-      </div>
+        </div>
 
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-try text-white" onclick="fetchExample('/goober', 'gooberResponse')">
-          <i class="bi bi-play-fill"></i> Try it out
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/goober', 'gooberResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="gooberResponse" class="live-response"></div>
       </div>
-      <div id="gooberResponse" class="live-response"></div>
     </div>
-  </div>
 
-  <!-- /goober/image -->
-  <div class="endpoint-card">
-    <div class="endpoint-header">
-      <h4 class="endpoint-title">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/goober/image</span>
-      </h4>
-    </div>
-    <div class="endpoint-body">
-      <p class="endpoint-description">
-        Returns a random Goober image directly as binary JPEG data for immediate display or download.
-      </p>
-      
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-try text-white" onclick="loadImage('/goober/image', 'gooberImage')">
-          <i class="bi bi-image"></i> Load Preview
-        </button>
+    <!-- /goober/image -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/goober/image</span>
+        </h4>
       </div>
-      <div><img id="gooberImage" class="img-preview" src="" alt="Click 'Load Preview' to see image" style="display: none;" /></div>
-    </div>
-  </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns a random Goober image directly as binary JPEG data for immediate display or download.
+        </p>
 
-  <!-- /quote -->
-  <div class="endpoint-card">
-    <div class="endpoint-header">
-      <h4 class="endpoint-title">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/quote</span>
-      </h4>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="loadImage('/goober/image', 'gooberImage')">
+            <i class="bi bi-image"></i> Load Preview
+          </button>
+        </div>
+        <div><img id="gooberImage" class="img-preview" src="" alt="Click 'Load Preview' to see image"
+            style="display: none;" /></div>
+      </div>
     </div>
-    <div class="endpoint-body">
-      <p class="endpoint-description">
-        Retrieves a random inspirational quote from the configured quote collection.
-      </p>
-      
-      <div class="response-section">
-        <div class="section-label">Example Response</div>
-        <pre><code class="language-json">{
+
+    <!-- /quote -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/quote</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Retrieves a random inspirational quote from the configured quote collection.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
   "quote": "Be yourself; everyone else is already taken."
 }</code></pre>
-      </div>
+        </div>
 
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-try text-white" onclick="fetchExample('/quote', 'quoteResponse')">
-          <i class="bi bi-play-fill"></i> Try it out
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/quote', 'quoteResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="quoteResponse" class="live-response"></div>
       </div>
-      <div id="quoteResponse" class="live-response"></div>
     </div>
-  </div>
 
-  <!-- /joke -->
-  <div class="endpoint-card">
-    <div class="endpoint-header">
-      <h4 class="endpoint-title">
-        <span class="method-badge">GET</span>
-        <span class="endpoint-path">/joke</span>
-      </h4>
+    <!-- /gully -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/gully</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Retrieves a random Gully image URL with its extracted numeric identifier from the filename.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
+    "url": "https://api.garythe.cat/Gully/gully1.jpg",
+    "number": 1
+  }</code></pre>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/gully', 'gullyResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="gullyResponse" class="live-response"></div>
+      </div>
     </div>
-    <div class="endpoint-body">
-      <p class="endpoint-description">
-        Retrieves a random joke from the collection for entertainment purposes.
-      </p>
-      
-      <div class="response-section">
-        <div class="section-label">Example Response</div>
-        <pre><code class="language-json">{
+
+    <!-- /gully/image -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/gully/image</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns a random Gully image directly as binary JPEG data for immediate display or download.
+        </p>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="loadImage('/gully/image', 'gullyImage')">
+            <i class="bi bi-image"></i> Load Preview
+          </button>
+        </div>
+        <div><img id="gullyImage" class="img-preview" src="" alt="Click 'Load Preview' to see image"
+            style="display: none;" /></div>
+      </div>
+    </div>
+
+    <!-- Counts -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/gary/count, /goober/count, /gully/count</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns the current number of images available for each collection. Useful for monitoring or UI counters.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Responses</div>
+          <pre><code class="language-json">{ "count": 42 }</code></pre>
+          <pre><code class="language-json">{ "count": 8 }</code></pre>
+          <pre><code class="language-json">{ "count": 10 }</code></pre>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/gary/count', 'garyCountResponse')">
+            <i class="bi bi-play-fill"></i> Try Gary Count
+          </button>
+          <button class="btn btn-try text-white" onclick="fetchExample('/goober/count', 'gooberCountResponse')">
+            <i class="bi bi-play-fill"></i> Try Goober Count
+          </button>
+          <button class="btn btn-try text-white" onclick="fetchExample('/gully/count', 'gullyCountResponse')">
+            <i class="bi bi-play-fill"></i> Try Gully Count
+          </button>
+        </div>
+        <div id="garyCountResponse" class="live-response"></div>
+        <div id="gooberCountResponse" class="live-response"></div>
+        <div id="gullyCountResponse" class="live-response"></div>
+      </div>
+    </div>
+
+    <!-- /joke -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/joke</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Retrieves a random joke from the collection for entertainment purposes.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
   "joke": "Why don't scientists trust atoms? Because they make up everything!"
 }</code></pre>
-      </div>
+        </div>
 
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-try text-white" onclick="fetchExample('/joke', 'jokeResponse')">
-          <i class="bi bi-play-fill"></i> Try it out
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/joke', 'jokeResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="jokeResponse" class="live-response"></div>
       </div>
-      <div id="jokeResponse" class="live-response"></div>
     </div>
   </div>
-</div>
 
-<footer class="footer">
-  <div class="container">
-    <p class="mb-0">Gary & Goober API Documentation • Built with ❤️</p>
-  </div>
-</footer>
+  <footer class="footer">
+    <div class="container">
+      <p class="mb-0">Gary & Goober API Documentation • Built with ❤️</p>
+    </div>
+  </footer>
 
-<script>
-function fetchExample(endpoint, elementId) {
-  const responseDiv = document.getElementById(elementId);
-  responseDiv.innerHTML = '<div class="loading-spinner"></div> Loading...';
-  
-  fetch('https://api.garythe.cat' + endpoint)
-    .then(res => res.json())
-    .then(data => {
-      responseDiv.textContent = JSON.stringify(data, null, 2);
-    })
-    .catch(err => {
-      responseDiv.innerHTML = '<span style="color: #dc2626;">❌ Error: ' + err.message + '</span>';
-    });
-}
+  <script>
+    function fetchExample(endpoint, elementId) {
+      const responseDiv = document.getElementById(elementId);
+      responseDiv.innerHTML = '<div class="loading-spinner"></div> Loading...';
 
-function loadImage(endpoint, imgId) {
-  const img = document.getElementById(imgId);
-  const button = event.target;
-  
-  button.innerHTML = '<div class="loading-spinner"></div> Loading...';
-  button.disabled = true;
-  
-  img.style.display = 'none';
-  img.onload = function() {
-    img.style.display = 'block';
-    button.innerHTML = '<i class="bi bi-image"></i> Load Preview';
-    button.disabled = false;
-  };
-  
-  img.onerror = function() {
-    img.alt = 'Failed to load image';
-    button.innerHTML = '<i class="bi bi-image"></i> Load Preview';
-    button.disabled = false;
-  };
-  
-  img.src = 'https://api.garythe.cat' + endpoint + '?' + Date.now();
-}
-</script>
+      fetch('https://api.garythe.cat' + endpoint)
+        .then(res => res.json())
+        .then(data => {
+          responseDiv.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(err => {
+          responseDiv.innerHTML = '<span style="color: #dc2626;">❌ Error: ' + err.message + '</span>';
+        });
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    function loadImage(endpoint, imgId) {
+      const img = document.getElementById(imgId);
+      const button = event.target;
+
+      button.innerHTML = '<div class="loading-spinner"></div> Loading...';
+      button.disabled = true;
+
+      img.style.display = 'none';
+      img.onload = function () {
+        img.style.display = 'block';
+        button.innerHTML = '<i class="bi bi-image"></i> Load Preview';
+        button.disabled = false;
+      };
+
+      img.onerror = function () {
+        img.alt = 'Failed to load image';
+        button.innerHTML = '<i class="bi bi-image"></i> Load Preview';
+        button.disabled = false;
+      };
+
+      img.src = 'https://api.garythe.cat' + endpoint + '?' + Date.now();
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
 </body>
+
 </html>
