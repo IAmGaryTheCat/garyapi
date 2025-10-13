@@ -20,7 +20,7 @@ import (
 const (
 	defaultGaryImg   = "Gary76.jpg"
 	defaultGooberImg = "goober8.jpg"
-	defaultGullyImg  = "gully1.jpg"
+	defaultGullyImg  = "Gully1.jpg"
 )
 
 var (
