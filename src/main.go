@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,7 +12,9 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 )
 
@@ -82,18 +83,18 @@ func extractNumberFromFilename(filename string) int {
 	return number
 }
 
-func serveRandomImageHandler(images *[]string, defaultImage, imageDir string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Header("Cache-Control", "no-store")
+func serveRandomImageHandler(images *[]string, defaultImage, imageDir string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		c.Set("Cache-Control", "no-store")
 		imageCacheMu.RLock()
 		imageName := getRandomFileName(*images, defaultImage)
 		imageCacheMu.RUnlock()
-		c.File(filepath.Join(imageDir, imageName))
+		return c.SendFile(filepath.Join(imageDir, imageName))
 	}
 }
 
-func serveImageURLHandler(baseURL, imageDir string, images *[]string, defaultImage string) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func serveImageURLHandler(baseURL string, images *[]string, defaultImage string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
 		imageCacheMu.RLock()
 		imageName := getRandomFileName(*images, defaultImage)
 		imageCacheMu.RUnlock()
@@ -106,19 +107,18 @@ func serveImageURLHandler(baseURL, imageDir string, images *[]string, defaultIma
 		}
 		url := fmt.Sprintf("%s/%s", cleanBaseURL, imageName)
 
-		c.JSON(http.StatusOK, gin.H{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"url":    url,
 			"number": number,
 		})
 	}
 }
 
-func serveRandomLineHandler(filePath string) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func serveRandomLineHandler(filePath string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
 		line, err := getRandomLineFromFile(filePath)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 
 		var key string
@@ -131,7 +131,7 @@ func serveRandomLineHandler(filePath string) gin.HandlerFunc {
 			key = "line"
 		}
 
-		c.JSON(http.StatusOK, gin.H{key: line})
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{key: line})
 	}
 }
 
@@ -176,8 +176,10 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	rand.Seed(time.Now().UnixNano())
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
+
+	app := fiber.New()
+	app.Use(recover.New())
+	app.Use(logger.New())
 
 	garyDir := os.Getenv("GARY_DIR")
 	gooberDir := os.Getenv("GOOBER_DIR")
@@ -192,54 +194,51 @@ func main() {
 	startDirectoryWatcher(gooberDir, &gooberImages, "Goober")
 	startDirectoryWatcher(gullyDir, &gullyImages, "Gully")
 
-	r.Static("/Gary", garyDir)
-	r.Static("/Goober", gooberDir)
-	r.Static("/Gully", gullyDir)
+	app.Static("/Gary", garyDir)
+	app.Static("/Goober", gooberDir)
+	app.Static("/Gully", gullyDir)
 
-	imageRoutes := r.Group("/")
-	{
-		imageRoutes.GET("/gary/image/*path", serveRandomImageHandler(&garyImages, defaultGaryImg, garyDir))
-		imageRoutes.GET("/goober/image/*path", serveRandomImageHandler(&gooberImages, defaultGooberImg, gooberDir))
-		imageRoutes.GET("/gully/image/*path", serveRandomImageHandler(&gullyImages, defaultGullyImg, gullyDir))
-	}
+	app.Get("/gary/image", serveRandomImageHandler(&garyImages, defaultGaryImg, garyDir))
+	app.Get("/gary/image/*", serveRandomImageHandler(&garyImages, defaultGaryImg, garyDir))
+	app.Get("/goober/image", serveRandomImageHandler(&gooberImages, defaultGooberImg, gooberDir))
+	app.Get("/goober/image/*", serveRandomImageHandler(&gooberImages, defaultGooberImg, gooberDir))
+	app.Get("/gully/image", serveRandomImageHandler(&gullyImages, defaultGullyImg, gullyDir))
+	app.Get("/gully/image/*", serveRandomImageHandler(&gullyImages, defaultGullyImg, gullyDir))
 
-	apiRoutes := r.Group("/")
-	{
-		garyBaseURL := os.Getenv("GARYURL")
-		gooberBaseURL := os.Getenv("GOOBERURL")
-		gullyBaseURL := os.Getenv("GULLYURL")
+	garyBaseURL := os.Getenv("GARYURL")
+	gooberBaseURL := os.Getenv("GOOBERURL")
+	gullyBaseURL := os.Getenv("GULLYURL")
 
-		apiRoutes.GET("/gary", serveImageURLHandler(garyBaseURL, garyDir, &garyImages, defaultGaryImg))
-		apiRoutes.GET("/goober", serveImageURLHandler(gooberBaseURL, gooberDir, &gooberImages, defaultGooberImg))
-		apiRoutes.GET("/gully", serveImageURLHandler(gullyBaseURL, gullyDir, &gullyImages, defaultGullyImg))
-		apiRoutes.GET("/quote", serveRandomLineHandler(quotesPath))
-		apiRoutes.GET("/joke", serveRandomLineHandler(jokesPath))
+	app.Get("/gary", serveImageURLHandler(garyBaseURL, &garyImages, defaultGaryImg))
+	app.Get("/goober", serveImageURLHandler(gooberBaseURL, &gooberImages, defaultGooberImg))
+	app.Get("/gully", serveImageURLHandler(gullyBaseURL, &gullyImages, defaultGullyImg))
+	app.Get("/quote", serveRandomLineHandler(quotesPath))
+	app.Get("/joke", serveRandomLineHandler(jokesPath))
 
-		apiRoutes.GET("/gary/count", func(c *gin.Context) {
-			imageCacheMu.RLock()
-			count := len(garyImages)
-			imageCacheMu.RUnlock()
-			c.JSON(http.StatusOK, gin.H{"count": count})
-		})
-		apiRoutes.GET("/goober/count", func(c *gin.Context) {
-			imageCacheMu.RLock()
-			count := len(gooberImages)
-			imageCacheMu.RUnlock()
-			c.JSON(http.StatusOK, gin.H{"count": count})
-		})
-		apiRoutes.GET("/gully/count", func(c *gin.Context) {
-			imageCacheMu.RLock()
-			count := len(gullyImages)
-			imageCacheMu.RUnlock()
-			c.JSON(http.StatusOK, gin.H{"count": count})
-		})
-	}
+	app.Get("/gary/count", func(c *fiber.Ctx) error {
+		imageCacheMu.RLock()
+		count := len(garyImages)
+		imageCacheMu.RUnlock()
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"count": count})
+	})
+	app.Get("/goober/count", func(c *fiber.Ctx) error {
+		imageCacheMu.RLock()
+		count := len(gooberImages)
+		imageCacheMu.RUnlock()
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"count": count})
+	})
+	app.Get("/gully/count", func(c *fiber.Ctx) error {
+		imageCacheMu.RLock()
+		count := len(gullyImages)
+		imageCacheMu.RUnlock()
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"count": count})
+	})
 
 	indexFile := os.Getenv("INDEX_FILE")
 	if indexFile != "" {
-		r.GET("/", func(c *gin.Context) {
-			c.Header("Cache-Control", "no-store")
-			c.File(indexFile)
+		app.Get("/", func(c *fiber.Ctx) error {
+			c.Set("Cache-Control", "no-store")
+			return c.SendFile(indexFile)
 		})
 	}
 
@@ -247,7 +246,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	if err := r.Run(":" + port); err != nil {
+	if err := app.Listen(":" + port); err != nil {
 		fmt.Printf("Failed to start the server: %v\n", err)
 	}
 }
