@@ -1,6 +1,6 @@
 # Gary API
 
-A minimal HTTP API for serving random images of Gary and Goober, as well as quotes and jokes. Built using Go and Gin, this API is designed to be fast and self-contained.
+A minimal HTTP API for serving random images of Gary and Goober, as well as quotes and jokes. Built using Go and Fiber, this API is designed to be fast and self-contained.
 
 ---
 
