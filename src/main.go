@@ -173,6 +173,7 @@ func startDirectoryWatcher(dir string, cache *[]string, label string) {
 
 func main() {
 	_ = godotenv.Load()
+	startTime := time.Now().UTC()
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	rand.Seed(time.Now().UnixNano())
@@ -214,6 +215,33 @@ func main() {
 	app.Get("/gully", serveImageURLHandler(gullyBaseURL, &gullyImages, defaultGullyImg))
 	app.Get("/quote", serveRandomLineHandler(quotesPath))
 	app.Get("/joke", serveRandomLineHandler(jokesPath))
+
+	app.Get("/info", func(c *fiber.Ctx) error {
+		handlerStart := time.Now()
+		c.Set("Cache-Control", "no-store")
+
+		now := time.Now().UTC()
+		uptime := now.Sub(startTime)
+
+		resp := fiber.Map{
+			"now":           now.Format(time.RFC3339Nano),
+			"start_time":    startTime.Format(time.RFC3339Nano),
+			"uptime_ms":     uptime.Milliseconds(),
+			"go_version":    runtime.Version(),
+			"num_goroutine": runtime.NumGoroutine(),
+			"num_cpu":       runtime.NumCPU(),
+			"gomaxprocs":    runtime.GOMAXPROCS(0),
+		}
+		resp["latency_ms"] = time.Since(handlerStart).Milliseconds()
+		return c.Status(fiber.StatusOK).JSON(resp)
+	})
+
+	app.Get("/health", func(c *fiber.Ctx) error {
+		c.Set("Cache-Control", "no-store")
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"status": "ok",
+		})
+	})
 
 	app.Get("/gary/count", func(c *fiber.Ctx) error {
 		imageCacheMu.RLock()
