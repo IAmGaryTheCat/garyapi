@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"sync"
 	"time"
-
 	"github.com/fsnotify/fsnotify"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -20,14 +19,16 @@ import (
 
 const (
 	defaultGaryImg   = "Gary76.jpg"
-	defaultGooberImg = "goober8.jpg"
+	defaultGooberImg = "Goober8.jpg"
 	defaultGullyImg  = "Gully1.jpg"
+	defaultGarfieldImg = "Garfield1.jpg"
 )
 
 var (
 	garyImages   []string
 	gooberImages []string
 	gullyImages  []string
+	garfieldImages []string
 	imageCacheMu sync.RWMutex
 )
 
@@ -186,18 +187,22 @@ func main() {
 	gooberDir := os.Getenv("GOOBER_DIR")
 	gullyDir := os.Getenv("GULLY_DIR")
 	quotesPath := os.Getenv("QUOTES_FILE")
+	garfieldDir := os.Getenv("GARFIELD_DIR")
 	jokesPath := os.Getenv("JOKES_FILE")
 
 	garyImages = cacheFileNames(garyDir)
 	gooberImages = cacheFileNames(gooberDir)
 	gullyImages = cacheFileNames(gullyDir)
+	garfieldImages = cacheFileNames(garfieldDir)
 	startDirectoryWatcher(garyDir, &garyImages, "Gary")
 	startDirectoryWatcher(gooberDir, &gooberImages, "Goober")
 	startDirectoryWatcher(gullyDir, &gullyImages, "Gully")
+	startDirectoryWatcher(garfieldDir, &garfieldImages, "Garfield")
 
 	app.Static("/Gary", garyDir)
 	app.Static("/Goober", gooberDir)
 	app.Static("/Gully", gullyDir)
+	app.Static("/Garfield", garfieldDir)
 
 	app.Get("/gary/image", serveRandomImageHandler(&garyImages, defaultGaryImg, garyDir))
 	app.Get("/gary/image/*", serveRandomImageHandler(&garyImages, defaultGaryImg, garyDir))
@@ -205,14 +210,18 @@ func main() {
 	app.Get("/goober/image/*", serveRandomImageHandler(&gooberImages, defaultGooberImg, gooberDir))
 	app.Get("/gully/image", serveRandomImageHandler(&gullyImages, defaultGullyImg, gullyDir))
 	app.Get("/gully/image/*", serveRandomImageHandler(&gullyImages, defaultGullyImg, gullyDir))
+	app.Get("/garfield/image", serveRandomImageHandler(&garfieldImages, defaultGarfieldImg, garfieldDir))
+	app.Get("/garfield/image/*", serveRandomImageHandler(&garfieldImages, defaultGarfieldImg, garfieldDir))
 
 	garyBaseURL := os.Getenv("GARYURL")
 	gooberBaseURL := os.Getenv("GOOBERURL")
 	gullyBaseURL := os.Getenv("GULLYURL")
+	garfieldBaseURL := os.Getenv("GARFIELDURL")
 
 	app.Get("/gary", serveImageURLHandler(garyBaseURL, &garyImages, defaultGaryImg))
 	app.Get("/goober", serveImageURLHandler(gooberBaseURL, &gooberImages, defaultGooberImg))
 	app.Get("/gully", serveImageURLHandler(gullyBaseURL, &gullyImages, defaultGullyImg))
+	app.Get("/garfield", serveImageURLHandler(garfieldBaseURL, &garfieldImages, defaultGarfieldImg))
 	app.Get("/quote", serveRandomLineHandler(quotesPath))
 	app.Get("/joke", serveRandomLineHandler(jokesPath))
 
@@ -258,6 +267,12 @@ func main() {
 	app.Get("/gully/count", func(c *fiber.Ctx) error {
 		imageCacheMu.RLock()
 		count := len(gullyImages)
+		imageCacheMu.RUnlock()
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"count": count})
+	})
+	app.Get("/garfield/count", func(c *fiber.Ctx) error {
+		imageCacheMu.RLock()
+		count := len(garfieldImages)
 		imageCacheMu.RUnlock()
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"count": count})
 	})
