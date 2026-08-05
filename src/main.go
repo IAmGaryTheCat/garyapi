@@ -127,6 +127,7 @@ func serveImageURLHandler(baseURL string, images *[]string, defaultImage string)
 
 		imgs := *images
 
+
 		if count == 1 {
 			imageName := defaultImage
 			if len(imgs) > 0 {
@@ -138,12 +139,28 @@ func serveImageURLHandler(baseURL string, images *[]string, defaultImage string)
 			})
 		}
 
-		results := make([]fiber.Map, 0, count)
-		for i := 0; i < count; i++ {
-			imageName := defaultImage
-			if len(imgs) > 0 {
-				imageName = imgs[rand.Intn(len(imgs))]
+
+		var chosen []string
+		if len(imgs) == 0 {
+			chosen = make([]string, count)
+			for i := range chosen {
+				chosen[i] = defaultImage
 			}
+		} else {
+
+			n := count
+			if n > len(imgs) {
+				n = len(imgs)
+			}
+			perm := rand.Perm(len(imgs))
+			chosen = make([]string, n)
+			for i := 0; i < n; i++ {
+				chosen[i] = imgs[perm[i]]
+			}
+		}
+
+		results := make([]fiber.Map, 0, len(chosen))
+		for _, imageName := range chosen {
 			results = append(results, fiber.Map{
 				"url":    fmt.Sprintf("%s/%s", cleanBaseURL, imageName),
 				"number": extractNumberFromFilename(imageName),
@@ -152,7 +169,7 @@ func serveImageURLHandler(baseURL string, images *[]string, defaultImage string)
 
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"images": results,
-			"count":  count,
+			"count":  len(results),
 		})
 	}
 }
