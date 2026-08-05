@@ -264,8 +264,8 @@
   <div class="hero-section">
     <div class="container">
       <h1 class="hero-title">Gary & Goober API Documentation</h1>
-      <p class="hero-subtitle">A RESTful API providing random images, quotes, and jokes with structured JSON responses
-      </p>
+      <p class="hero-subtitle">A RESTful API serving random themed images, quotes, jokes, and service metadata with
+        structured JSON responses</p>
     </div>
   </div>
 
@@ -273,8 +273,12 @@
     <div class="api-info">
       <h5><i class="bi bi-info-circle"></i> API Information</h5>
       <p class="mb-2"><strong>Base URL:</strong> <span class="base-url">https://api.garythe.cat</span></p>
-      <p class="mb-0">All endpoints return JSON responses unless otherwise specified. Images include extracted numeric
-        IDs from filenames.</p>
+      <p class="mb-0">Current routes include themed image URL endpoints, direct binary image responses, quote/joke
+        endpoints, health and runtime info endpoints, and static directory endpoints for <code>/Gary</code>,
+        <code>/Goober</code>, <code>/Gully</code>, and <code>/Garfield</code>. Images include extracted numeric
+        identifiers from filenames. The themed URL endpoints also accept optional <code>count</code>/<code>n</code>
+        query parameters or the <code>X-Image-Count</code> header, with a default of <code>1</code> and a ceiling of
+        <code>750</code>.</p>
     </div>
 
     <!-- /gary -->
@@ -287,14 +291,28 @@
       </div>
       <div class="endpoint-body">
         <p class="endpoint-description">
-          Retrieves a random Gary image URL with its extracted numeric identifier from the filename.
+          Retrieves a random Gary image URL with its extracted numeric identifier from the filename. Supports an
+          optional <code>count</code> or <code>n</code> query parameter, or the <code>X-Image-Count</code> header, to
+          return multiple image URLs in a single response.
         </p>
 
         <div class="response-section">
-          <div class="section-label">Example Response</div>
+          <div class="section-label">Example Response (count=1)</div>
           <pre><code class="language-json">{
   "url": "https://api.garythe.cat/Gary/Gary76.jpg",
   "number": 76
+}</code></pre>
+        </div>
+
+        <div class="response-section">
+          <div class="section-label">Example Response (count=3)</div>
+          <pre><code class="language-json">{
+  "images": [
+    { "url": "https://api.garythe.cat/Gary/Gary76.jpg", "number": 76 },
+    { "url": "https://api.garythe.cat/Gary/Gary12.jpg", "number": 12 },
+    { "url": "https://api.garythe.cat/Gary/Gary44.jpg", "number": 44 }
+  ],
+  "count": 3
 }</code></pre>
         </div>
 
@@ -340,14 +358,28 @@
       </div>
       <div class="endpoint-body">
         <p class="endpoint-description">
-          Retrieves a random Goober image URL with its extracted numeric identifier from the filename.
+          Retrieves a random Goober image URL with its extracted numeric identifier from the filename. Supports an
+          optional <code>count</code> or <code>n</code> query parameter, or the <code>X-Image-Count</code> header, to
+          return multiple image URLs in a single response.
         </p>
 
         <div class="response-section">
-          <div class="section-label">Example Response</div>
+          <div class="section-label">Example Response (count=1)</div>
           <pre><code class="language-json">{
   "url": "https://api.garythe.cat/Goober/goober8.jpg",
   "number": 8
+}</code></pre>
+        </div>
+
+        <div class="response-section">
+          <div class="section-label">Example Response (count=3)</div>
+          <pre><code class="language-json">{
+  "images": [
+    { "url": "https://api.garythe.cat/Goober/goober8.jpg", "number": 8 },
+    { "url": "https://api.garythe.cat/Goober/goober2.jpg", "number": 2 },
+    { "url": "https://api.garythe.cat/Goober/goober21.jpg", "number": 21 }
+  ],
+  "count": 3
 }</code></pre>
         </div>
 
@@ -379,6 +411,73 @@
           </button>
         </div>
         <div><img id="gooberImage" class="img-preview" src="" alt="Click 'Load Preview' to see image"
+            style="display: none;" /></div>
+      </div>
+    </div>
+
+    <!-- /garfield -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/garfield</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Retrieves a random Garfield image URL with its extracted numeric identifier from the filename. Supports an
+          optional <code>count</code> or <code>n</code> query parameter, or the <code>X-Image-Count</code> header, to
+          return multiple image URLs in a single response.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response (count=1)</div>
+          <pre><code class="language-json">{
+  "url": "https://api.garythe.cat/Garfield/Garfield1.jpg",
+  "number": 1
+}</code></pre>
+        </div>
+
+        <div class="response-section">
+          <div class="section-label">Example Response (count=3)</div>
+          <pre><code class="language-json">{
+  "images": [
+    { "url": "https://api.garythe.cat/Garfield/Garfield1.jpg", "number": 1 },
+    { "url": "https://api.garythe.cat/Garfield/Garfield5.jpg", "number": 5 },
+    { "url": "https://api.garythe.cat/Garfield/Garfield9.jpg", "number": 9 }
+  ],
+  "count": 3
+}</code></pre>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/garfield', 'garfieldResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="garfieldResponse" class="live-response"></div>
+      </div>
+    </div>
+
+    <!-- /garfield/image -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/garfield/image</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns a random Garfield image directly as binary JPEG data for immediate display or download.
+        </p>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="loadImage('/garfield/image', 'garfieldImage')">
+            <i class="bi bi-image"></i> Load Preview
+          </button>
+        </div>
+        <div><img id="garfieldImage" class="img-preview" src="" alt="Click 'Load Preview' to see image"
             style="display: none;" /></div>
       </div>
     </div>
@@ -422,15 +521,29 @@
       </div>
       <div class="endpoint-body">
         <p class="endpoint-description">
-          Retrieves a random Gully image URL with its extracted numeric identifier from the filename.
+          Retrieves a random Gully image URL with its extracted numeric identifier from the filename. Supports an
+          optional <code>count</code> or <code>n</code> query parameter, or the <code>X-Image-Count</code> header, to
+          return multiple image URLs in a single response.
         </p>
 
         <div class="response-section">
-          <div class="section-label">Example Response</div>
+          <div class="section-label">Example Response (count=1)</div>
           <pre><code class="language-json">{
     "url": "https://api.garythe.cat/Gully/gully1.jpg",
     "number": 1
   }</code></pre>
+        </div>
+
+        <div class="response-section">
+          <div class="section-label">Example Response (count=3)</div>
+          <pre><code class="language-json">{
+  "images": [
+    { "url": "https://api.garythe.cat/Gully/gully1.jpg", "number": 1 },
+    { "url": "https://api.garythe.cat/Gully/gully2.jpg", "number": 2 },
+    { "url": "https://api.garythe.cat/Gully/gully3.jpg", "number": 3 }
+  ],
+  "count": 3
+}</code></pre>
         </div>
 
         <div class="d-flex align-items-center gap-3">
@@ -470,7 +583,7 @@
       <div class="endpoint-header">
         <h4 class="endpoint-title">
           <span class="method-badge">GET</span>
-          <span class="endpoint-path">/gary/count, /goober/count, /gully/count</span>
+          <span class="endpoint-path">/gary/count, /goober/count, /gully/count, /garfield/count</span>
         </h4>
       </div>
       <div class="endpoint-body">
@@ -483,6 +596,7 @@
           <pre><code class="language-json">{ "count": 42 }</code></pre>
           <pre><code class="language-json">{ "count": 8 }</code></pre>
           <pre><code class="language-json">{ "count": 10 }</code></pre>
+          <pre><code class="language-json">{ "count": 5 }</code></pre>
         </div>
 
         <div class="d-flex align-items-center gap-3">
@@ -495,10 +609,14 @@
           <button class="btn btn-try text-white" onclick="fetchExample('/gully/count', 'gullyCountResponse')">
             <i class="bi bi-play-fill"></i> Try Gully Count
           </button>
+          <button class="btn btn-try text-white" onclick="fetchExample('/garfield/count', 'garfieldCountResponse')">
+            <i class="bi bi-play-fill"></i> Try Garfield Count
+          </button>
         </div>
         <div id="garyCountResponse" class="live-response"></div>
         <div id="gooberCountResponse" class="live-response"></div>
         <div id="gullyCountResponse" class="live-response"></div>
+        <div id="garfieldCountResponse" class="live-response"></div>
       </div>
     </div>
 
@@ -528,6 +646,72 @@
           </button>
         </div>
         <div id="jokeResponse" class="live-response"></div>
+      </div>
+    </div>
+
+    <!-- /health -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/health</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns a simple liveness response indicating the service is available.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
+  "status": "ok"
+}</code></pre>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/health', 'healthResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="healthResponse" class="live-response"></div>
+      </div>
+    </div>
+
+    <!-- /info -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <h4 class="endpoint-title">
+          <span class="method-badge">GET</span>
+          <span class="endpoint-path">/info</span>
+        </h4>
+      </div>
+      <div class="endpoint-body">
+        <p class="endpoint-description">
+          Returns server startup metadata and runtime diagnostics, including startup timestamp, uptime, Go version, and
+          thread/cpu information.
+        </p>
+
+        <div class="response-section">
+          <div class="section-label">Example Response</div>
+          <pre><code class="language-json">{
+  "now": "2026-08-04T12:34:56.789Z",
+  "start_time": "2026-08-04T12:34:00.123Z",
+  "uptime_ms": 5632,
+  "go_version": "go1.24.0",
+  "num_goroutine": 6,
+  "num_cpu": 8,
+  "gomaxprocs": 8,
+  "latency_ms": 2
+}</code></pre>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-try text-white" onclick="fetchExample('/info', 'infoResponse')">
+            <i class="bi bi-play-fill"></i> Try it out
+          </button>
+        </div>
+        <div id="infoResponse" class="live-response"></div>
       </div>
     </div>
   </div>

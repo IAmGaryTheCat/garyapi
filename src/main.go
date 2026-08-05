@@ -22,6 +22,8 @@ const (
 	defaultGooberImg = "Goober8.jpg"
 	defaultGullyImg  = "Gully1.jpg"
 	defaultGarfieldImg = "Garfield1.jpg"
+	defaultImageCount = 1
+	maxImageCount      = 750
 )
 
 var (
@@ -96,21 +98,61 @@ func serveRandomImageHandler(images *[]string, defaultImage, imageDir string) fi
 
 func serveImageURLHandler(baseURL string, images *[]string, defaultImage string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		imageCacheMu.RLock()
-		imageName := getRandomFileName(*images, defaultImage)
-		imageCacheMu.RUnlock()
+		raw := c.Query("count")
+		if raw == "" {
+			raw = c.Query("n")
+		}
+		if raw == "" {
+			raw = c.Get("X-Image-Count")
+		}
 
-		number := extractNumberFromFilename(imageName)
+		count := defaultImageCount
+		if raw != "" {
+			var n int
+			if _, err := fmt.Sscanf(raw, "%d", &n); err == nil && n >= 1 {
+				count = n
+				if count > maxImageCount {
+					count = maxImageCount
+				}
+			}
+		}
 
 		cleanBaseURL := baseURL
 		if len(cleanBaseURL) > 0 && cleanBaseURL[len(cleanBaseURL)-1] == '/' {
 			cleanBaseURL = cleanBaseURL[:len(cleanBaseURL)-1]
 		}
-		url := fmt.Sprintf("%s/%s", cleanBaseURL, imageName)
+
+		imageCacheMu.RLock()
+		defer imageCacheMu.RUnlock()
+
+		imgs := *images
+
+		if count == 1 {
+			imageName := defaultImage
+			if len(imgs) > 0 {
+				imageName = imgs[rand.Intn(len(imgs))]
+			}
+			return c.Status(fiber.StatusOK).JSON(fiber.Map{
+				"url":    fmt.Sprintf("%s/%s", cleanBaseURL, imageName),
+				"number": extractNumberFromFilename(imageName),
+			})
+		}
+
+		results := make([]fiber.Map, 0, count)
+		for i := 0; i < count; i++ {
+			imageName := defaultImage
+			if len(imgs) > 0 {
+				imageName = imgs[rand.Intn(len(imgs))]
+			}
+			results = append(results, fiber.Map{
+				"url":    fmt.Sprintf("%s/%s", cleanBaseURL, imageName),
+				"number": extractNumberFromFilename(imageName),
+			})
+		}
 
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"url":    url,
-			"number": number,
+			"images": results,
+			"count":  count,
 		})
 	}
 }
